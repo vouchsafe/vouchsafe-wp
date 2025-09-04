@@ -8,7 +8,7 @@
  * Author: Vouchsafe
  * Requires at least: 6.0
  * License: GPL-3.0-or-later
- * License URI: https://github.com/vouchsafe/vouchsafe-wp?tab=GPL-3.0-1-ov-file
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: vouchsafe
  * Domain Path: /languages
  */
