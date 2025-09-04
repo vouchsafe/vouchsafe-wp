@@ -112,10 +112,10 @@ function vouchsafe_render_settings_page()
     </form>
 
     <hr />
-    <h2>Quick Tips</h2>
+    <h2>How to use the plugin</h2>
     <ol>
       <li>After activating this plugin, visit <em>Settings → Permalinks</em> and click <strong>Save</strong> once to ensure rewrites are flushed.</li>
-      <li>Set your form’s confirmation URL to: <code><?php echo esc_html(home_url('/vouchsafe/request')); ?>?email={merge-tag}</code></li>
+      <li>Send users who need verification to: <code><?php echo esc_html(home_url('/vouchsafe/request')); ?>?email={merge-tag}</code></li>
       <li>You can optionally pass additional fields: <code>first_name</code>, <code>last_name</code>, <code>workflow_id</code>, <code>external_id</code>, <code>redirect_url</code>, <code>street_address</code>, <code>postcode</code>, <code>date_of_birth</code>, <code>expires_at</code>, and a <code>fallback</code> URL for graceful failure.</li>
     </ol>
   </div>

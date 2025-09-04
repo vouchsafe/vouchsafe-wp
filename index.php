@@ -7,7 +7,8 @@
  * Version: 0.1.0
  * Author: Vouchsafe
  * Requires at least: 6.0
- * License: GPL-2.0-or-later
+ * License: GPL-3.0-or-later
+ *  * License URI: https://github.com/vouchsafe/vouchsafe-wp?tab=GPL-3.0-1-ov-file
  */
 
 if (!defined('ABSPATH')) exit;
