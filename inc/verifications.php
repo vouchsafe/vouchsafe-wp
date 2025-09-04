@@ -63,6 +63,8 @@ function vouchsafe_render_verifications_page()
     <?php echo $notice_html; ?>
 
     <form method="get" style="margin: 10px 0;">
+
+
       <input type="hidden" name="page" value="vouchsafe-verifications" />
       <label for="vs_status" class="screen-reader-text"><?php esc_html_e('Filter by status:', 'vouchsafe'); ?></label>
       <select name="vs_status" id="vs_status">
@@ -73,6 +75,11 @@ function vouchsafe_render_verifications_page()
         <?php endforeach; ?>
       </select>
       <?php submit_button(__('Filter'), 'secondary', '', false); ?>
+
+
+      <div class="alignright">
+        <a class="button" href="https://app.vouchsafe.id/admin/teams/<?php echo $client_id_for_links ?>">Go to Vouchsafe dashboard</a>
+      </div>
     </form>
 
     <table class="widefat striped">
@@ -81,8 +88,7 @@ function vouchsafe_render_verifications_page()
           <th><?php esc_html_e('Email', 'vouchsafe'); ?></th>
           <th><?php esc_html_e('Status', 'vouchsafe'); ?></th>
           <th><?php esc_html_e('Workflow', 'vouchsafe'); ?></th>
-          <th><?php esc_html_e('Created', 'vouchsafe'); ?></th>
-          <th class="column-actions"><?php esc_html_e('Actions', 'vouchsafe'); ?></th>
+          <th><?php esc_html_e('Started', 'vouchsafe'); ?></th>
         </tr>
       </thead>
       <tbody>
@@ -96,7 +102,9 @@ function vouchsafe_render_verifications_page()
           $flows = vouchsafe_list_flows();
           if (!is_wp_error($flows) && is_array($flows)) {
             foreach ($flows as $f) {
-              if (isset($f['id'])) { $flow_names[$f['id']] = $f['name'] ?? $f['id']; }
+              if (isset($f['id'])) {
+                $flow_names[$f['id']] = $f['name'] ?? $f['id'];
+              }
             }
           }
 
@@ -106,30 +114,43 @@ function vouchsafe_render_verifications_page()
             $id          = esc_html($r['id'] ?? '');
             $status_txt  = esc_html($r['status'] ?? '');
             $email       = esc_html($r['email'] ?? '');
-            $workflow_id = $r['workflow_id'] ?? ''; $workflow_label = esc_html($flow_names[$workflow_id] ?? $workflow_id);
+            $workflow_id = $r['workflow_id'] ?? '';
+            $workflow_label = esc_html($flow_names[$workflow_id] ?? $workflow_id);
             $created_at  = vouchsafe_format_iso_datetime($r['created_at'] ?? '');
 
-            // Build dashboard URL: https://app.vouchsafe.id/admin/teams/{client_id}/cases/{id}
             $dash_url = '';
             if ($client_id_for_links && $id) {
               $base = untrailingslashit(VOUCHSAFE_DASHBOARD_BASE);
               $dash_url = esc_url($base . '/admin/teams/' . rawurlencode($client_id_for_links) . '/cases/' . rawurlencode($id));
             }
+
+            $flow_url = '';
+            if ($client_id_for_links && $workflow_id) {
+              $base = untrailingslashit(VOUCHSAFE_DASHBOARD_BASE);
+              $flow_url = esc_url($base . '/admin/teams/' . rawurlencode($client_id_for_links) . '/builder/' . rawurlencode($workflow_id));
+            }
           ?>
             <tr>
-              <td><?php echo $email; ?></td>
-              <td><?php echo $status_txt; ?></td>
-              <td><?php echo $workflow_label; ?></td>
-              <td><?php echo $created_at; ?></td>
               <td>
                 <?php if ($dash_url): ?>
-                  <a class="button button-small" href="<?php echo $dash_url; ?>" target="_blank" rel="noopener">
-                    <?php esc_html_e('Open in Vouchsafe', 'vouchsafe'); ?>
+                  <a href="<?php echo $dash_url; ?>" class="row-title">
+                    <?php echo $email; ?>
                   </a>
                 <?php else: ?>
-                  <span class="description"><?php esc_html_e('Configure Client ID to enable links', 'vouchsafe'); ?></span>
+                  <?php echo $email; ?>
                 <?php endif; ?>
               </td>
+              <td><?php echo $status_txt; ?></td>
+              <td>
+                <?php if ($flow_url): ?>
+                  <a href="<?php echo $flow_url; ?>">
+                    <?php echo $workflow_label; ?>
+                  </a>
+                <?php else: ?>
+                  <?php echo $workflow_label; ?>
+                <?php endif; ?>
+              </td>
+              <td><?php echo $created_at; ?></td>
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -141,8 +162,13 @@ function vouchsafe_render_verifications_page()
       <div class="tablenav-pages one-page">
         <span class="displaying-num">
           <?php
+          $current_count = is_array($rows) ? count($rows) : 0;
           printf(
-            esc_html__('Showing up to %d most recent results, sorted by Created.', 'vouchsafe'),
+            esc_html__(
+              'Showing %1$d of up to %2$d items',
+              'vouchsafe'
+            ),
+            $current_count,
             (int) $limit
           );
           ?>
@@ -150,7 +176,7 @@ function vouchsafe_render_verifications_page()
 
       </div>
 
-      <br class="clear">
+      <br class="clear" />
     </div>
 
 

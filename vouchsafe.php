@@ -3,12 +3,14 @@
 /**
  * Plugin Name: Vouchsafe
  * Author URI: https://vouchsafe.id
- * Description: Request Vouchsafe verifications from your WordPress site or form
+ * Description: Request and manage Vouchsafe verifications from your WordPress website.
  * Version: 0.1.0
  * Author: Vouchsafe
  * Requires at least: 6.0
  * License: GPL-3.0-or-later
- *  * License URI: https://github.com/vouchsafe/vouchsafe-wp?tab=GPL-3.0-1-ov-file
+ * License URI: https://github.com/vouchsafe/vouchsafe-wp?tab=GPL-3.0-1-ov-file
+ * Text Domain: vouchsafe
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) exit;
@@ -39,6 +41,10 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
   $url = admin_url('options-general.php?page=vouchsafe-settings');
   array_unshift($links, '<a href="' . esc_url($url) . '">Settings</a>');
   return $links;
+});
+
+add_action('init', function () {
+  load_plugin_textdomain('vouchsafe', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
 
 include_once "inc/admin.php";
