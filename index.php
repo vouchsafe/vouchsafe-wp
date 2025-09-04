@@ -44,3 +44,4 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 include_once "inc/admin.php";
 include_once "inc/api.php";
 include_once "inc/endpoint.php";
+include_once "inc/verifications.php";
