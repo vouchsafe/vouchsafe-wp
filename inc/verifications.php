@@ -10,8 +10,8 @@ if (!defined('VOUCHSAFE_DASHBOARD_BASE')) {
  */
 add_action('admin_menu', function () {
   add_menu_page(
-    __('Verifications', 'vouchsafe'),
-    __('Verifications', 'vouchsafe'),
+    __('Verifications', 'vouchsafe-wp'),
+    __('Verifications', 'vouchsafe-wp'),
     'manage_options',
     'vouchsafe-verifications',
     'vouchsafe_render_verifications_page',
@@ -36,7 +36,8 @@ function vouchsafe_render_verifications_page()
 {
   if (!current_user_can('manage_options')) return;
 
-  $status = isset($_GET['vs_status']) ? sanitize_text_field($_GET['vs_status']) : '';
+  $nonce_ok = isset($_GET['vs_nonce']) && wp_verify_nonce(wp_unslash($_GET['vs_nonce']), 'vouchsafe_filter_status');
+  $status = ($nonce_ok && isset($_GET['vs_status'])) ? sanitize_text_field(wp_unslash($_GET['vs_status'])) : '';
   $notice_html = '';
 
   if (!function_exists('vouchsafe_list_verifications')) {
@@ -58,43 +59,52 @@ function vouchsafe_render_verifications_page()
   $limit = 50; // display cap
 ?>
   <div class="wrap">
-    <h1><?php esc_html_e('Verifications', 'vouchsafe'); ?></h1>
+    <h1><?php esc_html_e('Verifications', 'vouchsafe-wp'); ?></h1>
 
-    <?php echo $notice_html; ?>
+    <?php echo wp_kses_post($notice_html); ?>
 
     <form method="get" style="margin: 10px 0;">
+      <?php wp_nonce_field('vouchsafe_filter_status', 'vs_nonce', false); ?>
 
 
       <input type="hidden" name="page" value="vouchsafe-verifications" />
-      <label for="vs_status" class="screen-reader-text"><?php esc_html_e('Filter by status:', 'vouchsafe'); ?></label>
+      <label for="vs_status" class="screen-reader-text"><?php esc_html_e('Filter by status:', 'vouchsafe-wp'); ?></label>
       <select name="vs_status" id="vs_status">
         <?php foreach ($statuses as $s): ?>
           <option value="<?php echo esc_attr($s); ?>" <?php selected($status, $s); ?>>
-            <?php echo $s ? esc_html($s) : esc_html__('All Statuses', 'vouchsafe'); ?>
+            <?php echo $s ? esc_html($s) : esc_html__('All Statuses', 'vouchsafe-wp'); ?>
           </option>
         <?php endforeach; ?>
       </select>
-      <?php submit_button(__('Filter'), 'secondary', '', false); ?>
+      <?php submit_button(__('Filter', 'vouchsafe-wp'), 'secondary', '', false); ?>
 
 
       <div class="alignright">
-        <a class="button" href="https://app.vouchsafe.id/admin/teams/<?php echo $client_id_for_links ?>">Go to Vouchsafe dashboard</a>
+        <?php
+        $dash_button_url = '';
+        if (! empty($client_id_for_links)) {
+          $dash_button_url = esc_url(untrailingslashit(VOUCHSAFE_DASHBOARD_BASE) . '/admin/teams/' . rawurlencode($client_id_for_links));
+        }
+        ?>
+        <?php if ($dash_button_url) : ?>
+          <a class="button" href="<?php echo esc_url($dash_button_url); ?>"><?php echo esc_html__('Go to Vouchsafe dashboard', 'vouchsafe-wp'); ?></a>
+        <?php endif; ?>
       </div>
     </form>
 
     <table class="widefat striped">
       <thead>
         <tr>
-          <th><?php esc_html_e('Email', 'vouchsafe'); ?></th>
-          <th><?php esc_html_e('Status', 'vouchsafe'); ?></th>
-          <th><?php esc_html_e('Workflow', 'vouchsafe'); ?></th>
-          <th><?php esc_html_e('Started', 'vouchsafe'); ?></th>
+          <th><?php esc_html_e('Email', 'vouchsafe-wp'); ?></th>
+          <th><?php esc_html_e('Status', 'vouchsafe-wp'); ?></th>
+          <th><?php esc_html_e('Workflow', 'vouchsafe-wp'); ?></th>
+          <th><?php esc_html_e('Started', 'vouchsafe-wp'); ?></th>
         </tr>
       </thead>
       <tbody>
         <?php if (empty($rows)): ?>
           <tr>
-            <td colspan="6"><?php esc_html_e('No verifications found.', 'vouchsafe'); ?></td>
+            <td colspan="6"><?php esc_html_e('No verifications found.', 'vouchsafe-wp'); ?></td>
           </tr>
         <?php else: ?>
           <?php
@@ -133,24 +143,24 @@ function vouchsafe_render_verifications_page()
             <tr>
               <td>
                 <?php if ($dash_url): ?>
-                  <a href="<?php echo $dash_url; ?>" class="row-title">
-                    <?php echo $email; ?>
+                  <a href="<?php echo esc_url($dash_url); ?>" class="row-title">
+                    <?php echo esc_html($email); ?>
                   </a>
                 <?php else: ?>
-                  <?php echo $email; ?>
+                  <?php echo esc_html($email); ?>
                 <?php endif; ?>
               </td>
-              <td><?php echo $status_txt; ?></td>
+              <td><?php echo esc_html($status_txt); ?></td>
               <td>
                 <?php if ($flow_url): ?>
-                  <a href="<?php echo $flow_url; ?>">
-                    <?php echo $workflow_label; ?>
+                  <a href="<?php echo esc_url($flow_url); ?>">
+                    <?php echo esc_html($workflow_label); ?>
                   </a>
                 <?php else: ?>
-                  <?php echo $workflow_label; ?>
+                  <?php echo esc_html($workflow_label); ?>
                 <?php endif; ?>
               </td>
-              <td><?php echo $created_at; ?></td>
+              <td><?php echo esc_html($created_at); ?></td>
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -164,11 +174,12 @@ function vouchsafe_render_verifications_page()
           <?php
           $current_count = is_array($rows) ? count($rows) : 0;
           printf(
+            /* translators: 1: number of items shown, 2: maximum number of items displayed */
             esc_html__(
               'Showing %1$d of up to %2$d items',
-              'vouchsafe'
+              'vouchsafe-wp'
             ),
-            $current_count,
+            (int) $current_count,
             (int) $limit
           );
           ?>

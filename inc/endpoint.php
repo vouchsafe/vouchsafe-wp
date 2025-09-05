@@ -28,12 +28,13 @@ add_filter('query_vars', function ($vars) {
 add_action('template_redirect', function () {
   if (!get_query_var('vouchsafe_request')) return;
 
+  
   // Collect query params
-  $email = isset($_GET['email']) ? sanitize_email(wp_unslash($_GET['email'])) : '';
-  $fallback = isset($_GET['fallback']) ? esc_url_raw(wp_unslash($_GET['fallback'])) : '';
+  $email = isset($_GET['email']) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : '';
+  $fallback = isset($_GET['fallback']) ? esc_url_raw( wp_unslash( $_GET['fallback'] ) ) : '';
 
   if (!$email || !is_email($email)) {
-    return vouchsafe_fail('Missing or invalid email.', $fallback);
+    return vouchsafe_fail(__('Missing or invalid email.', 'vouchsafe-wp'), $fallback);
   }
 
   // Build a payload
@@ -52,19 +53,27 @@ add_action('template_redirect', function () {
   $payload = ['email' => $email];
   foreach ($map as $queryKey => $bodyKey) {
     if (isset($_GET[$queryKey])) {
-      // Very light sanitisation: these are identifiers/claims, not HTML
-      $val = trim(wp_unslash($_GET[$queryKey]));
-      if ($val !== '') $payload[$bodyKey] = $val;
+      $raw = wp_unslash( $_GET[$queryKey] );
+      switch ($queryKey) {
+        case 'redirect_url':
+          $val = esc_url_raw( $raw );
+          break;
+        default:
+          $val = sanitize_text_field( $raw );
+      }
+      if ($val !== '') {
+        $payload[$bodyKey] = $val;
+      }
     }
   }
+
 
   // Request verification
   $result = vouchsafe_request_verification($payload);
   if (is_wp_error($result)) {
     // Log a minimal error
     $msg = $result->get_error_message();
-    error_log('[Vouchsafe] Verification request failed: ' . $msg);
-    return vouchsafe_fail('Sorry, we could not start your verification.', $fallback);
+return vouchsafe_fail('Sorry, we could not start your verification.', $fallback);
   }
 
   // Redirect to returned URL
@@ -79,5 +88,5 @@ function vouchsafe_fail($message, $fallback = '')
     wp_safe_redirect($fallback, 302);
     exit;
   }
-  wp_die(esc_html($message), 'Verification Error', ['response' => 500]);
+  wp_die( esc_html( $message ), esc_html__( 'Verification Error', 'vouchsafe-wp' ), ['response' => 500]);
 }

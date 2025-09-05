@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Vouchsafe
+ * Plugin Name: Vouchsafe – Easy ID & Age Verification for WP
  * Author URI: https://vouchsafe.id
  * Description: Request and manage Vouchsafe verifications from your WordPress website.
  * Version: 0.1.0
@@ -9,7 +9,7 @@
  * Requires at least: 6.0
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain: vouchsafe
+ * Text Domain: vouchsafe-wp
  * Domain Path: /languages
  */
 
@@ -41,10 +41,6 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
   $url = admin_url('options-general.php?page=vouchsafe-settings');
   array_unshift($links, '<a href="' . esc_url($url) . '">Settings</a>');
   return $links;
-});
-
-add_action('init', function () {
-  load_plugin_textdomain('vouchsafe', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
 
 include_once "inc/admin.php";

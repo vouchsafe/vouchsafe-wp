@@ -143,7 +143,7 @@ function vouchsafe_render_settings_page()
         $client_id = esc_attr($opt['client_id'] ?? '');
         echo '<table class="form-table" role="presentation"><tbody>';
         echo '<tr><th scope="row"><label for="vouchsafe_client_id">Client ID</label></th><td>';
-        echo '<input id="vouchsafe_client_id" type="text" class="regular-text" name="' . esc_attr(VOUCHSAFE_OPT) . '[client_id]" value="' . $client_id . '" autocomplete="off" />';
+        echo '<input id="vouchsafe_client_id" type="text" class="regular-text" name="' . esc_attr(VOUCHSAFE_OPT) . '[client_id]" value="' . esc_attr($client_id) . '" autocomplete="off" />';
         echo '</td></tr>';
         echo '<tr><th scope="row"><label for="vouchsafe_client_secret">Client Secret</label></th><td>';
         echo '<input id="vouchsafe_client_secret" type="password" class="regular-text" name="' . esc_attr(VOUCHSAFE_OPT) . '[client_secret]" value="" placeholder="••••••••••••" autocomplete="new-password" />';
@@ -166,7 +166,7 @@ function vouchsafe_render_settings_page()
         </div>
       <?php endif; ?>
 
-      <?php echo $flows_notice; ?>
+      <?php echo wp_kses_post($flows_notice); ?>
 
       <div class="vouchsafe-actions">
         <form method="post" class="inline-form">
@@ -190,7 +190,7 @@ function vouchsafe_render_settings_page()
             $id = esc_attr($flow['id']);
             $name = esc_html($flow['name'] ?? $flow['id']);
             $sel = selected($selected_flow, $id, false);
-            echo "<option value=\"{$id}\" {$sel}>{$name}</option>";
+            echo '<option value="' . esc_attr($id) . '" ' . ($sel ? 'selected="selected"' : '') . '>' . esc_html($name) . '</option>';
           }
         } else {
           echo '<option disabled value="">Fetch flows first</option>';
