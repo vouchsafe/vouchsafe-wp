@@ -36,8 +36,20 @@ function vouchsafe_render_verifications_page()
 {
   if (!current_user_can('manage_options')) return;
 
-  $nonce_ok = isset($_GET['vs_nonce']) && wp_verify_nonce(wp_unslash($_GET['vs_nonce']), 'vouchsafe_filter_status');
-  $status = ($nonce_ok && isset($_GET['vs_status'])) ? sanitize_text_field(wp_unslash($_GET['vs_status'])) : '';
+  // $nonce_ok = isset($_GET['vs_nonce']) && wp_verify_nonce(wp_unslash($_GET['vs_nonce']), 'vouchsafe_filter_status');
+  // $status = ($nonce_ok && isset($_GET['vs_status'])) ? sanitize_text_field(wp_unslash($_GET['vs_status'])) : '';
+
+  // Read + sanitize nonce first (appeases PHPCS).
+  $vs_nonce = isset($_GET['vs_nonce']) ? sanitize_text_field(wp_unslash($_GET['vs_nonce'])) : '';
+  $nonce_ok = ($vs_nonce && wp_verify_nonce($vs_nonce, 'vouchsafe_filter_status'));
+
+  // Only trust status if nonce is valid.
+  $status = ($nonce_ok && isset($_GET['vs_status']))
+    ? sanitize_text_field(wp_unslash($_GET['vs_status']))
+    : '';
+
+
+
   $notice_html = '';
 
   if (!function_exists('vouchsafe_list_verifications')) {
