@@ -1,4 +1,4 @@
-# Vouchsafe WP
+# Vouchsafe – Easy ID & Age Verification for WP
 
 Add age verification and identity checks to your WordPress site with Vouchsafe. UK Online Safety Act–oriented, privacy-first, and simple to setup.
 
